@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+*/node_modules/
+venv/
+*/venv/
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# Production Builds
+dist/
+*/dist/
+build/
+*/build/
+.vercel/
+*/.vercel/
+
+# Environment variables
+.env
+.env.local
+*/.env
+*/.env.local
+
+# Logs and scratch
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+uploads/
+*/uploads/
+.system_generated/
+*.log

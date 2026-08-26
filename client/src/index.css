@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#090D16] text-slate-100 font-sans;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4F46E5;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-glow {
+  box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-sky-400;
+}
+
+.gradient-text-gold {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500;
+}
+
+.gradient-text-emerald {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-300;
+}
+
+/* Print Styles for A4 Resume Preview & Export */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .resume-print-area, .resume-print-area * {
+    visibility: visible;
+  }
+  .resume-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 20mm !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
