@@ -121,6 +121,11 @@ const connectDB = async () => {
       connectionTimeoutMillis: 7000,
     });
 
+    // Handle unexpected idle connection errors to prevent process crash in serverless/Node
+    pool.on('error', (err) => {
+      console.warn('⚠️  Unexpected PostgreSQL idle client error (handled):', err.message);
+    });
+
     const client = await pool.connect();
     const result = await client.query('SELECT NOW() as now, version() as version');
     console.log(`✅ Connected to Neon PostgreSQL Database successfully: ${result.rows[0].now}`);
@@ -132,6 +137,7 @@ const connectDB = async () => {
   } catch (error) {
     console.warn(`⚠️  Neon PostgreSQL connection failed (${error.message}). Falling back to In-Memory Store.`);
     isDemoStore = true;
+    isConnected = false;
   }
 };
 

@@ -1,32 +1,45 @@
 const axios = require('axios');
 
-const AI_SERVICE_BASE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const customAiUrl = process.env.AI_SERVICE_URL;
+
+// On serverless environments (Vercel) without external AI URL, immediately use local engine
+const shouldUseLocalDirectly = isVercel && (!customAiUrl || customAiUrl.includes('localhost') || customAiUrl.includes('127.0.0.1'));
+const AI_SERVICE_BASE_URL = customAiUrl || 'http://127.0.0.1:8000';
 
 const aiServiceProxy = {
   // Analyze resume text/file
   async analyzeResume({ text, targetRole, jobDescription, fileName }) {
+    if (shouldUseLocalDirectly) {
+      return aiServiceProxy.getLocalDeterministicAnalysis(text, targetRole, jobDescription);
+    }
+
     try {
       const response = await axios.post(`${AI_SERVICE_BASE_URL}/api/analyze`, {
         text,
         target_role: targetRole || 'Software Engineer',
         job_description: jobDescription || '',
         file_name: fileName || 'resume.txt',
-      }, { timeout: 8000 });
+      }, { timeout: 3500 });
       return response.data;
     } catch (error) {
-      console.warn('AI Service unavailable or timed out, executing local Node.js deterministic fallback:', error.message);
+      console.warn('AI Microservice unavailable or timed out, executing deterministic fallback:', error.message);
       return aiServiceProxy.getLocalDeterministicAnalysis(text, targetRole, jobDescription);
     }
   },
 
   // Enhance bullet point
   async enhanceBullet({ bullet, style, targetRole }) {
+    if (shouldUseLocalDirectly) {
+      return aiServiceProxy.getLocalBulletEnhancement(bullet, style, targetRole);
+    }
+
     try {
       const response = await axios.post(`${AI_SERVICE_BASE_URL}/api/generate/bullet`, {
         bullet,
         style: style || 'achievement',
         target_role: targetRole || 'Software Engineer',
-      }, { timeout: 6000 });
+      }, { timeout: 3000 });
       return response.data;
     } catch (error) {
       return aiServiceProxy.getLocalBulletEnhancement(bullet, style, targetRole);
@@ -35,13 +48,19 @@ const aiServiceProxy = {
 
   // Generate executive summary
   async generateSummary({ experienceYears, targetRole, skills, background }) {
+    if (shouldUseLocalDirectly) {
+      return {
+        summary: `Accomplished ${targetRole || 'Software Engineer'} with ${experienceYears || '5+'} years of experience designing and delivering resilient high-scale solutions. Proficient across ${(skills || ['React', 'Node.js', 'Python', 'AWS']).slice(0, 5).join(', ')}. Demonstrated success improving architecture latency and driving measurable operational efficiencies.`,
+      };
+    }
+
     try {
       const response = await axios.post(`${AI_SERVICE_BASE_URL}/api/generate/summary`, {
         experience_years: experienceYears,
         target_role: targetRole,
         skills,
         background,
-      }, { timeout: 6000 });
+      }, { timeout: 3000 });
       return response.data;
     } catch (error) {
       return {
@@ -52,12 +71,16 @@ const aiServiceProxy = {
 
   // Career copilot chat
   async chatWithCopilot({ message, history, resumeContext }) {
+    if (shouldUseLocalDirectly) {
+      return aiServiceProxy.getLocalCopilotResponse(message, resumeContext);
+    }
+
     try {
       const response = await axios.post(`${AI_SERVICE_BASE_URL}/api/chatbot`, {
         message,
         history,
         resume_context: resumeContext,
-      }, { timeout: 8000 });
+      }, { timeout: 3500 });
       return response.data;
     } catch (error) {
       return aiServiceProxy.getLocalCopilotResponse(message, resumeContext);
@@ -66,13 +89,17 @@ const aiServiceProxy = {
 
   // Job Match
   async matchJob({ resumeText, resumeData, jobDescription, targetRole }) {
+    if (shouldUseLocalDirectly) {
+      return aiServiceProxy.getLocalJobMatch(resumeText, jobDescription, targetRole);
+    }
+
     try {
       const response = await axios.post(`${AI_SERVICE_BASE_URL}/api/match`, {
         resume_text: resumeText,
         resume_data: resumeData,
         job_description: jobDescription,
         target_role: targetRole,
-      }, { timeout: 8000 });
+      }, { timeout: 3500 });
       return response.data;
     } catch (error) {
       return aiServiceProxy.getLocalJobMatch(resumeText, jobDescription, targetRole);
