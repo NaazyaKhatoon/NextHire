@@ -25,6 +25,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root Landing Endpoint
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "NextHire Python FastAPI AI Microservice",
+        "version": "2.5.0",
+        "health": "/health",
+        "docs": "/docs",
+        "demoMode": os.getenv("DEMO_MODE", "true") == "true"
+    }
+
 # Health Check
 @app.get("/health")
 def health_check():
